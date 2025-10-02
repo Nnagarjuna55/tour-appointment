@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { adminAPI } from '../../services/api';
-import { Calendar, Clock, MapPin, Users, Search, Filter, Eye, Edit, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Search, Filter, Eye, Edit, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 

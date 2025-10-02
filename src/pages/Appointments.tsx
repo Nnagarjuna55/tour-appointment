@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { appointmentAPI, adminAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, Clock, MapPin, Users, Search, Filter, X } from 'lucide-react';
+import { Calendar, Search, X } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 

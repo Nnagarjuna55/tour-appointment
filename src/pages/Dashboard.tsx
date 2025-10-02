@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
         (apt: any) => new Date(apt.visitDate) >= new Date() && apt.status !== 'cancelled'
     ) || [];
 
-    const recentAppointments = appointments?.slice(0, 3) || [];
+    // const recentAppointments = appointments?.slice(0, 3) || [];
 
     // Get admin stats if user is admin
     const { data: adminStats } = useQuery(

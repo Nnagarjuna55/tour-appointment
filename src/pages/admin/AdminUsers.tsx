@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { adminAPI } from '../../services/api';
-import { Users, Search, Plus, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Users, Search, Plus, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminUsers: React.FC = () => {

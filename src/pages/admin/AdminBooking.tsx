@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { appointmentAPI } from '../../services/api';
-import { Calendar, Clock, MapPin, Users, Plus, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -38,10 +37,10 @@ const AdminBooking: React.FC = () => {
 
     const queryClient = useQueryClient();
 
-    const { data: museumConfigs } = useQuery(
-        'museum-configs',
-        appointmentAPI.getMuseumConfigs
-    );
+    // const { data: museumConfigs } = useQuery(
+    //     'museum-configs',
+    //     appointmentAPI.getMuseumConfigs
+    // );
 
     const { data: timeSlots, isLoading: timeSlotsLoading } = useQuery(
         ['time-slots', formData.museum, formData.visitDate],
@@ -160,26 +159,26 @@ const AdminBooking: React.FC = () => {
         }));
     };
 
-    const addVisitorDetail = () => {
-        if (formData.visitorDetails.length < 5) {
-            setFormData(prev => ({
-                ...prev,
-                visitorDetails: [...prev.visitorDetails, {
-                    name: '',
-                    idNumber: '',
-                    idType: 'id_card',
-                    age: undefined
-                }]
-            }));
-        }
-    };
+    // const addVisitorDetail = () => {
+    //     if (formData.visitorDetails.length < 5) {
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             visitorDetails: [...prev.visitorDetails, {
+    //                 name: '',
+    //                 idNumber: '',
+    //                 idType: 'id_card',
+    //                 age: undefined
+    //             }]
+    //         }));
+    //     }
+    // };
 
-    const removeVisitorDetail = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            visitorDetails: prev.visitorDetails.filter((_, i) => i !== index)
-        }));
-    };
+    // const removeVisitorDetail = (index: number) => {
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         visitorDetails: prev.visitorDetails.filter((_, i) => i !== index)
+    //     }));
+    // };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

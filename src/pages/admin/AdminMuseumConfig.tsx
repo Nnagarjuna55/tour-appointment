@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { adminAPI } from '../../services/api';
-import { Building, Plus, Edit, Save, X } from 'lucide-react';
+import { Building, Plus, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminMuseumConfig: React.FC = () => {
@@ -160,42 +160,42 @@ const AdminMuseumConfig: React.FC = () => {
         setShowEditModal(true);
     };
 
-    const addTimeSlot = (type: string, form: any, setForm: any) => {
-        const newSlot = '';
-        if (type === 'regular') {
-            setForm({ ...form, regularTimeSlots: [...form.regularTimeSlots, newSlot] });
-        } else if (type === 'extended') {
-            setForm({ ...form, extendedTimeSlots: [...form.extendedTimeSlots, newSlot] });
-        } else if (type === 'special') {
-            setForm({ ...form, specialPeriodTimeSlots: [...form.specialPeriodTimeSlots, newSlot] });
-        }
-    };
+    // const addTimeSlot = (type: string, form: any, setForm: any) => {
+    //     const newSlot = '';
+    //     if (type === 'regular') {
+    //         setForm({ ...form, regularTimeSlots: [...form.regularTimeSlots, newSlot] });
+    //     } else if (type === 'extended') {
+    //         setForm({ ...form, extendedTimeSlots: [...form.extendedTimeSlots, newSlot] });
+    //     } else if (type === 'special') {
+    //         setForm({ ...form, specialPeriodTimeSlots: [...form.specialPeriodTimeSlots, newSlot] });
+    //     }
+    // };
 
-    const removeTimeSlot = (type: string, index: number, form: any, setForm: any) => {
-        if (type === 'regular') {
-            setForm({ ...form, regularTimeSlots: form.regularTimeSlots.filter((_: any, i: number) => i !== index) });
-        } else if (type === 'extended') {
-            setForm({ ...form, extendedTimeSlots: form.extendedTimeSlots.filter((_: any, i: number) => i !== index) });
-        } else if (type === 'special') {
-            setForm({ ...form, specialPeriodTimeSlots: form.specialPeriodTimeSlots.filter((_: any, i: number) => i !== index) });
-        }
-    };
+    // const removeTimeSlot = (type: string, index: number, form: any, setForm: any) => {
+    //     if (type === 'regular') {
+    //         setForm({ ...form, regularTimeSlots: form.regularTimeSlots.filter((_: any, i: number) => i !== index) });
+    //     } else if (type === 'extended') {
+    //         setForm({ ...form, extendedTimeSlots: form.extendedTimeSlots.filter((_: any, i: number) => i !== index) });
+    //     } else if (type === 'special') {
+    //         setForm({ ...form, specialPeriodTimeSlots: form.specialPeriodTimeSlots.filter((_: any, i: number) => i !== index) });
+    //     }
+    // };
 
-    const updateTimeSlot = (type: string, index: number, value: string, form: any, setForm: any) => {
-        if (type === 'regular') {
-            const newSlots = [...form.regularTimeSlots];
-            newSlots[index] = value;
-            setForm({ ...form, regularTimeSlots: newSlots });
-        } else if (type === 'extended') {
-            const newSlots = [...form.extendedTimeSlots];
-            newSlots[index] = value;
-            setForm({ ...form, extendedTimeSlots: newSlots });
-        } else if (type === 'special') {
-            const newSlots = [...form.specialPeriodTimeSlots];
-            newSlots[index] = value;
-            setForm({ ...form, specialPeriodTimeSlots: newSlots });
-        }
-    };
+    // const updateTimeSlot = (type: string, index: number, value: string, form: any, setForm: any) => {
+    //     if (type === 'regular') {
+    //         const newSlots = [...form.regularTimeSlots];
+    //         newSlots[index] = value;
+    //         setForm({ ...form, regularTimeSlots: newSlots });
+    //     } else if (type === 'extended') {
+    //         const newSlots = [...form.extendedTimeSlots];
+    //         newSlots[index] = value;
+    //         setForm({ ...form, extendedTimeSlots: newSlots });
+    //     } else if (type === 'special') {
+    //         const newSlots = [...form.specialPeriodTimeSlots];
+    //         newSlots[index] = value;
+    //         setForm({ ...form, specialPeriodTimeSlots: newSlots });
+    //     }
+    // };
 
     return (
         <div className="space-y-6">
