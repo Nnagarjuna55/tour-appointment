@@ -95,12 +95,56 @@ const AdminBooking: React.FC = () => {
 
             // Update visitor details when main visitor info changes
             if (field === 'visitorName' || field === 'idNumber' || field === 'idType') {
-                newFormData.visitorDetails = [{
+                // Update the first visitor (main visitor) in the array
+                const updatedVisitorDetails = [...prev.visitorDetails];
+                if (updatedVisitorDetails.length === 0) {
+                    updatedVisitorDetails.push({
+                        name: '',
+                        idNumber: '',
+                        idType: 'id_card',
+                        age: undefined
+                    });
+                }
+
+                updatedVisitorDetails[0] = {
+                    ...updatedVisitorDetails[0],
                     name: field === 'visitorName' ? value : prev.visitorName,
                     idNumber: field === 'idNumber' ? value : prev.idNumber,
                     idType: field === 'idType' ? value : prev.idType,
-                    age: undefined
-                }];
+                };
+
+                newFormData.visitorDetails = updatedVisitorDetails;
+            }
+
+            // Handle numberOfVisitors change
+            if (field === 'numberOfVisitors') {
+                const newVisitorDetails = [...prev.visitorDetails];
+
+                // Ensure we have at least the main visitor
+                if (newVisitorDetails.length === 0) {
+                    newVisitorDetails.push({
+                        name: prev.visitorName,
+                        idNumber: prev.idNumber,
+                        idType: prev.idType,
+                        age: undefined
+                    });
+                }
+
+                // Add or remove visitor details based on numberOfVisitors
+                while (newVisitorDetails.length < value) {
+                    newVisitorDetails.push({
+                        name: '',
+                        idNumber: '',
+                        idType: 'id_card',
+                        age: undefined
+                    });
+                }
+
+                while (newVisitorDetails.length > value) {
+                    newVisitorDetails.pop();
+                }
+
+                newFormData.visitorDetails = newVisitorDetails;
             }
 
             return newFormData;
@@ -140,13 +184,32 @@ const AdminBooking: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Always create visitor details from main visitor info
-        const visitorDetails = [{
+        // Ensure visitor details match the number of visitors
+        const visitorDetails = [];
+
+        // First visitor is always the main visitor
+        visitorDetails.push({
             name: formData.visitorName,
             idNumber: formData.idNumber,
             idType: formData.idType,
             age: undefined
-        }];
+        });
+
+        // Add additional visitors if numberOfVisitors > 1
+        for (let i = 1; i < formData.numberOfVisitors; i++) {
+            if (formData.visitorDetails[i]) {
+                // Use existing visitor detail if available
+                visitorDetails.push(formData.visitorDetails[i]);
+            } else {
+                // Create placeholder visitor detail
+                visitorDetails.push({
+                    name: `Visitor ${i + 1}`,
+                    idNumber: '',
+                    idType: 'id_card',
+                    age: undefined
+                });
+            }
+        }
 
         // Clean up form data - remove empty optional fields
         const cleanedFormData = {
@@ -155,6 +218,10 @@ const AdminBooking: React.FC = () => {
             visitorPhone: formData.visitorPhone.trim() || undefined,
             visitorDetails: visitorDetails
         };
+
+        console.log('Submitting appointment data:', cleanedFormData);
+        console.log('Number of visitors:', cleanedFormData.numberOfVisitors);
+        console.log('Visitor details length:', cleanedFormData.visitorDetails.length);
 
         createAppointmentMutation.mutate(cleanedFormData);
     };
@@ -362,6 +429,69 @@ const AdminBooking: React.FC = () => {
                                         ))}
                                     </select>
                                 </div>
+                            </div>
+
+                            {/* Additional Visitor Details */}
+                            {formData.numberOfVisitors > 1 && (
+                                <div className="mt-6">
+                                    <h4 className="text-md font-medium text-gray-900 mb-4">
+                                        Additional Visitor Details ({formData.numberOfVisitors - 1} more)
+                                    </h4>
+                                    <div className="space-y-4">
+                                        {formData.visitorDetails.slice(1).map((detail, index) => (
+                                            <div key={index + 1} className="border border-gray-200 rounded-lg p-4">
+                                                <h5 className="text-sm font-medium text-gray-700 mb-3">
+                                                    Visitor {index + 2}
+                                                </h5>
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700">
+                                                            Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="mt-1 input"
+                                                            value={detail.name}
+                                                            onChange={(e) => handleVisitorDetailChange(index + 1, 'name', e.target.value)}
+                                                            placeholder="Enter visitor name"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700">
+                                                            ID Number
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="mt-1 input"
+                                                            value={detail.idNumber}
+                                                            onChange={(e) => handleVisitorDetailChange(index + 1, 'idNumber', e.target.value)}
+                                                            placeholder="Enter ID number"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700">
+                                                            ID Type
+                                                        </label>
+                                                        <select
+                                                            className="mt-1 input"
+                                                            value={detail.idType}
+                                                            onChange={(e) => handleVisitorDetailChange(index + 1, 'idType', e.target.value)}
+                                                        >
+                                                            {idTypes.map(type => (
+                                                                <option key={type.value} value={type.value}>
+                                                                    {type.label}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             </div>
 
                             {/* Time Slots */}
