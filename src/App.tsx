@@ -33,7 +33,7 @@ function App() {
                         <Routes>
                             <Route path="/login" element={<Login />} />
                             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                            
+
                             {/* Redirect old booking route to admin booking */}
                             <Route path="/booking" element={<Navigate to="/admin/booking" replace />} />
 
