@@ -1,8 +1,13 @@
 import axios from 'axios';
 
 // const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'backend-museum-fqe0fsgtcddrfeff.canadacentral-01.azurewebsites.net/api';
-
+// Fix the API URL to always include https://
+let apiUrl = process.env.REACT_APP_API_URL || 'https://backend-museum-fqe0fsgtcddrfeff.canadacentral-01.azurewebsites.net/api';
+if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+    apiUrl = 'https://' + apiUrl;
+}
+const API_BASE_URL = apiUrl;
+console.log('API_BASE_URL:', API_BASE_URL);
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
