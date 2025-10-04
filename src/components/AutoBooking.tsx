@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { appointmentAPI } from '../services/api';
-import { Upload, FileText, Users, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Users, CheckCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface BookingData {
@@ -37,7 +37,7 @@ interface ParsedBooking {
 }
 
 const AutoBooking: React.FC = () => {
-    const [file, setFile] = useState<File | null>(null);
+    const [, setFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<ParsedBooking[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [bookingResults, setBookingResults] = useState<any[]>([]);
@@ -100,7 +100,7 @@ const AutoBooking: React.FC = () => {
                 // Clean up corrupted data - remove binary characters
                 const cleanParts = parts.map(part => {
                     // Remove null bytes and other binary characters
-                    return part.replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+                    return part.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').trim();
                 }).filter(part => part.length > 0);
 
                 // Handle simple "name, ID" format (exactly as provided)
