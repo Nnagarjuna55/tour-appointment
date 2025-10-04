@@ -41,6 +41,8 @@ const AutoBooking: React.FC = () => {
     const [parsedData, setParsedData] = useState<ParsedBooking[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [bookingResults, setBookingResults] = useState<any[]>([]);
+    const [inputMethod, setInputMethod] = useState<'file' | 'paste'>('file');
+    const [pastedData, setPastedData] = useState('');
     const queryClient = useQueryClient();
 
     const createAppointmentMutation = useMutation(
@@ -72,6 +74,80 @@ const AutoBooking: React.FC = () => {
         if (uploadedFile) {
             setFile(uploadedFile);
             parseFile(uploadedFile);
+        }
+    };
+
+    const handlePastedData = () => {
+        if (pastedData.trim()) {
+            parsePastedData(pastedData);
+        }
+    };
+
+    const parsePastedData = async (text: string) => {
+        setIsProcessing(true);
+        try {
+            const lines = text.split('\n').filter(line => line.trim());
+            const bookings: ParsedBooking[] = [];
+
+            for (const line of lines) {
+                const parts = line.split(',').map(part => part.trim());
+
+                // Clean up corrupted data - remove binary characters
+                const cleanParts = parts.map(part => {
+                    // Remove null bytes and other binary characters
+                    return part.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').trim();
+                }).filter(part => part.length > 0);
+
+                // Handle simple "name, ID" format (exactly as provided)
+                if (cleanParts.length === 2 && cleanParts[0] && cleanParts[1]) {
+                    // Skip empty lines or lines that don't look like name, ID
+                    if (cleanParts[0].length > 0 && cleanParts[1].length > 0) {
+                        const booking: ParsedBooking = {
+                            visitorName: cleanParts[0],
+                            idNumber: cleanParts[1],
+                            idType: 'id_card',
+                            museum: 'main',
+                            visitDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 days from now
+                            timeSlot: '16:30-18:00',
+                            numberOfVisitors: 1,
+                            visitorDetails: [{
+                                name: cleanParts[0],
+                                idNumber: cleanParts[1],
+                                idType: 'id_card',
+                                age: undefined
+                            }]
+                        };
+                        bookings.push(booking);
+                    }
+                }
+                // Handle full format (6+ columns)
+                else if (cleanParts.length >= 6) {
+                    const booking: ParsedBooking = {
+                        visitorName: cleanParts[0],
+                        idNumber: cleanParts[1],
+                        idType: cleanParts[2] || 'id_card',
+                        museum: cleanParts[3] || 'main',
+                        visitDate: cleanParts[4],
+                        timeSlot: cleanParts[5],
+                        numberOfVisitors: parseInt(cleanParts[6]) || 1,
+                        visitorDetails: [{
+                            name: cleanParts[0],
+                            idNumber: cleanParts[1],
+                            idType: cleanParts[2] || 'id_card',
+                            age: cleanParts[7] ? parseInt(cleanParts[7]) : undefined
+                        }]
+                    };
+                    bookings.push(booking);
+                }
+            }
+
+            setParsedData(bookings);
+            toast.success(`Parsed ${bookings.length} bookings from pasted data`);
+        } catch (error) {
+            console.error('Error parsing pasted data:', error);
+            toast.error('Error parsing pasted data');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -279,33 +355,97 @@ Jane Smith,987654321098765432,id_card,qin_han,2025-10-09,14:30-16:30,1,30`;
                 </div>
             </div>
 
-            {/* File Upload */}
+            {/* Input Method Selection */}
             <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload File (CSV or Text only)
+                    Choose Input Method
                 </label>
-                <div className="flex items-center space-x-4">
-                    <input
-                        type="file"
-                        accept=".csv,.txt"
-                        onChange={handleFileUpload}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
+                <div className="flex space-x-4 mb-4">
                     <button
-                        onClick={downloadTemplate}
-                        className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
+                        onClick={() => setInputMethod('file')}
+                        className={`px-4 py-2 rounded-md text-sm font-medium ${inputMethod === 'file'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
                     >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Full Template
+                        📁 Upload File
                     </button>
                     <button
-                        onClick={downloadSimpleTemplate}
-                        className="flex items-center px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100"
+                        onClick={() => setInputMethod('paste')}
+                        className={`px-4 py-2 rounded-md text-sm font-medium ${inputMethod === 'paste'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
                     >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Simple Template (Name, ID)
+                        📋 Copy & Paste Data
                     </button>
                 </div>
+
+                {/* File Upload Option */}
+                {inputMethod === 'file' && (
+                    <div className="flex items-center space-x-4">
+                        <input
+                            type="file"
+                            accept=".csv,.txt"
+                            onChange={handleFileUpload}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        <button
+                            onClick={downloadTemplate}
+                            className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Full Template
+                        </button>
+                        <button
+                            onClick={downloadSimpleTemplate}
+                            className="flex items-center px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Simple Template
+                        </button>
+                    </div>
+                )}
+
+                {/* Copy & Paste Option */}
+                {inputMethod === 'paste' && (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Paste your data here (Name, ID format):
+                            </label>
+                            <textarea
+                                value={pastedData}
+                                onChange={(e) => setPastedData(e.target.value)}
+                                placeholder="张丹,510105197908271783
+王远游,512221197303150994
+伍鸿睿,510703200606130015"
+                                className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={handlePastedData}
+                                disabled={!pastedData.trim() || isProcessing}
+                                className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Users className="w-4 h-4 mr-2" />
+                                {isProcessing ? 'Processing...' : 'Parse Data'}
+                            </button>
+                            <button
+                                onClick={() => setPastedData('')}
+                                className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                            <p><strong>Format:</strong> Name, ID Number (one per line)</p>
+                            <p><strong>Example:</strong> 张丹,510105197908271783</p>
+                            <p><strong>Auto-assigned:</strong> Main museum, 5 days ahead, 16:30-18:00</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Parsed Data Preview */}
@@ -453,6 +593,7 @@ Jane Smith,987654321098765432,id_card,qin_han,2025-10-09,14:30-16:30,1,30`;
                         setFile(null);
                         setParsedData([]);
                         setBookingResults([]);
+                        setPastedData('');
                     }}
                     className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
                 >
@@ -462,30 +603,28 @@ Jane Smith,987654321098765432,id_card,qin_han,2025-10-09,14:30-16:30,1,30`;
 
             {/* Instructions */}
             <div className="mt-6 p-4 bg-blue-50 rounded-md">
-                <h5 className="text-sm font-medium text-blue-900 mb-2">File Format Instructions:</h5>
+                <h5 className="text-sm font-medium text-blue-900 mb-2">Input Format Instructions:</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <h6 className="text-xs font-medium text-blue-900 mb-1">Simple Format (Name, ID):</h6>
+                        <h6 className="text-xs font-medium text-blue-900 mb-1">📋 Copy & Paste Format:</h6>
                         <ul className="text-xs text-blue-800 space-y-1">
-                            <li>• Format: 张丹,510105197908271783</li>
-                            <li>• Example: 王远游,512221197303150994</li>
+                            <li>• Format: Name, ID Number (one per line)</li>
+                            <li>• Example: 张丹,510105197908271783</li>
+                            <li>• Just paste your data directly into the text area</li>
                             <li>• Auto-assigned: Main museum, 5 days ahead, 16:30-18:00</li>
-                            <li>• Supports: CSV (.csv) and Text (.txt) files only</li>
-                            <li>• No headers needed, just name, ID on each line</li>
-                            <li>• ⚠️ Word files (.doc/.docx) not supported - save as CSV first</li>
+                            <li>• No file upload needed - instant processing</li>
                             <li>• 🚫 Duplicate IDs not allowed - each ID can only book once per day</li>
                         </ul>
                     </div>
                     <div>
-                        <h6 className="text-xs font-medium text-blue-900 mb-1">Full Format:</h6>
+                        <h6 className="text-xs font-medium text-blue-900 mb-1">📁 File Upload Format:</h6>
                         <ul className="text-xs text-blue-800 space-y-1">
-                            <li>• Format: visitorName,idNumber,idType,museum,visitDate,timeSlot,numberOfVisitors,age</li>
+                            <li>• Simple: Name, ID (same as copy-paste)</li>
+                            <li>• Full: visitorName,idNumber,idType,museum,visitDate,timeSlot,numberOfVisitors,age</li>
+                            <li>• Supports: CSV (.csv) and Text (.txt) files only</li>
                             <li>• idType: id_card, passport, hk_macau_passport, taiwan_permit, foreign_id</li>
                             <li>• museum: main (Shaanxi History Museum) or qin_han (Qin & Han Museum)</li>
-                            <li>• visitDate: YYYY-MM-DD format</li>
-                            <li>• timeSlot: Available time slots (e.g., 16:30-18:00)</li>
-                            <li>• numberOfVisitors: 1-5</li>
-                            <li>• age: Optional, for children under 14</li>
+                            <li>• ⚠️ Word files (.doc/.docx) not supported - save as CSV first</li>
                         </ul>
                     </div>
                 </div>
