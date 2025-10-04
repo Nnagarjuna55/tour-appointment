@@ -1,12 +1,17 @@
 import axios from 'axios';
 
+
 // const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 // Fix the API URL to always include https://
-let apiUrl = process.env.REACT_APP_API_URL || 'https://backend-museum-fqe0fsgtcddrfeff.canadacentral-01.azurewebsites.net/api';
-if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
-    apiUrl = 'https://' + apiUrl;
-}
-const API_BASE_URL = apiUrl;
+// let apiUrl = process.env.REACT_APP_API_URL || 'https://backend-museum-fqe0fsgtcddrfeff.canadacentral-01.azurewebsites.net/api';
+// if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+//     apiUrl = 'https://' + apiUrl;
+// }
+// const API_BASE_URL = apiUrl;
+// Use local backend for development, production backend for deployment
+const API_BASE_URL = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5000/api'
+    : process.env.REACT_APP_API_URL || 'https://backend-museum-fqe0fsgtcddrfeff.canadacentral-01.azurewebsites.net/api';
 console.log('API_BASE_URL:', API_BASE_URL);
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -77,6 +82,9 @@ export const appointmentAPI = {
 
     getMuseumConfigs: () =>
         api.get('/appointments/configs'),
+
+    getTimingStatus: () =>
+        api.get('/appointments/timing-status'),
 };
 
 export const adminAPI = {

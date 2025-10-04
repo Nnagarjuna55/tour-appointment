@@ -5,6 +5,7 @@ import { appointmentAPI } from '../services/api';
 import { Calendar, Clock, MapPin, Users, User, Phone, Mail, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { format, addDays } from 'date-fns';
+import TimingStatus from '../components/TimingStatus';
 
 interface VisitorDetail {
     name: string;
@@ -139,6 +140,9 @@ const Booking: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500">
                     Make a reservation for your museum visit
                 </p>
+
+                {/* Timing Status Component */}
+                <TimingStatus />
             </div>
 
             {/* Progress Steps */}

@@ -27,7 +27,7 @@
     },
     "scripts": {
         "start": "node server.js",
-        "dev": "react-scripts start",
+        "dev": "set REACT_APP_API_URL=http://localhost:5000/api && react-scripts start",
         "build": "react-scripts build",
         "build:ci": "react-scripts build",
         "test": "react-scripts test --passWithNoTests",
